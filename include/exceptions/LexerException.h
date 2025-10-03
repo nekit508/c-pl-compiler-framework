@@ -1,6 +1,7 @@
 #pragma once
 #include <exception>
 #include <string>
+#include <utility>
 
 #include "Exception.h"
 #include "utils/Pos.h"

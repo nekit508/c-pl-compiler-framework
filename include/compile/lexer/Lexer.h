@@ -12,11 +12,10 @@
 #include "utils/ReusableStreamVectorImpl.h"
 
 namespace ncompiler {
-    /** Must obtaint control over posProvider and stream. */
+    /** Must obtaint control over reader and keys in rules */
     struct Lexer : ReusableStreamVectorImpl<Token> {
         PosProviderReusableCharStreamWrapper *reader;
-        std::vector<std::string> root_rules;
-        std::map<std::string, LexerRule> rules;
+        std::vector<LexerRule*> root_rules;
         Token ct;
         bool token_parsed = false;
         Logger logger;
@@ -44,11 +43,15 @@ namespace ncompiler {
             ct.literal.push_back(c);
         }
 
+        void putCurChar() {
+            putChar(getChar());
+        }
+
         void redoChar() const {
             reader->redo();
         }
 
-        [[nodiscard]] char getNextChar() const {
+        char getNextChar() const { // NOLINT(*-use-nodiscard)
             return reader->next();
         }
 
@@ -60,48 +63,56 @@ namespace ncompiler {
             token_parsed = true;
         }
 
+        void tokenParsed(const TokenKind *kind) {
+            tokenParsed();
+            ct.kind = kind;
+        }
+
         Token readNextObject() noexcept(false) override {
             parseNextToken();
             return ct;
         }
 
-        bool tryParse(const std::string &name) {
-            return rules[name].tryParse(this);
+        bool tryParse(LexerRule *rule) {
+            return rule->tryParse(this);
+        }
+
+        bool tryParseAny(LexerRule *rule) {
+            return rule->tryParse(this);
         }
 
         void parseNextToken() noexcept(false) {
             try {
+                if (reader->getPos() == -1) {
+                    const auto c = reader->next();
+                    if (c == static_cast<char>(65279))
+                        logger.info("Probably you are using UTF with BOM that is not supported. " + reader->getCurrentPosition().toString());
+                }
+
                 token_parsed = false;
                 ct.kind = nullptr;
                 ct.literal.erase();
-
-                const auto c = reader->next();
-
                 ct.pos = reader->getCurrentPosition();
 
                 for (const auto &rule: root_rules) {
                     try {
-                        if (parseIfCan(rules[rule]))
+                        if (parseIfCan(rule) && token_parsed)
                             break;
                     } catch (const TokenParseException &fail) {
                         throw LexerExсeption(fail.whats(), reader->getCurrentPosition());
                     }
                 }
 
-                if (!token_parsed) {
-                    if (c == static_cast<char>(65279))
-                        throw LexerExсeption("Probably you are using UTF with BOM that is not supported.",
-                                             reader->getCurrentPosition());
-                    throw LexerExсeption("Unknown token kind.", reader->getCurrentPosition());
-                }
+                if (!token_parsed)
+                    throw LexerExсeption("Unknown token kind. ", reader->getCurrentPosition());
             } catch (const EOSExсeption &e) {
                 if (!token_parsed)
                     throw LexerExсeption(e.whats(), reader->getCurrentPosition());
             }
         }
 
-        [[nodiscard]] bool parseIfCan(LexerRule &rule) const noexcept(false) {
-            return rule.tryParse(const_cast<Lexer *>(this));
+        [[nodiscard]] bool parseIfCan(LexerRule *rule) const noexcept(false) {
+            return rule->tryParse(const_cast<Lexer *>(this));
         }
 
         ~Lexer() override {

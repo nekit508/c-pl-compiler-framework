@@ -4,7 +4,6 @@
 #include "utils/ReusableCharFileStream.h"
 
 int main() {
-
     ncompiler::Logger logger{true};
 
     std::ifstream stream("file");
@@ -13,13 +12,14 @@ int main() {
             new ncompiler::ReusableCharFileStream(
                 std::move(stream))),
         true);
-    ncompiler::lexer_rules::init(lexer);
+    ncompiler::lexer_rules::init(&lexer);
 
     while (true) {
         try {
             auto token = lexer.next();
             logger.info(token.toString());
         } catch (const ncompiler::LexerExсeption &e) {
+            logger.error(e.whats());
             break;
         }
     }
