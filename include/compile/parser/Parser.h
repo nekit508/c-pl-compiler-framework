@@ -41,7 +41,9 @@ namespace ncompiler {
         }
 
         ParserRule *rule(const std::string &name) {
-            return rules[name];
+            if (rules.find(name) != rules.end())
+                return rules[name];
+            throw ParserException("Unknown rule " + name + ".");
         }
 
         [[nodiscard]] Token current() const {
@@ -50,6 +52,10 @@ namespace ncompiler {
 
         [[nodiscard]] Token next() const noexcept(false) {
             return tokens_stream->next();
+        }
+
+        void skip() const noexcept(false) {
+            tokens_stream->next();
         }
 
         void redo() const {

@@ -10,7 +10,7 @@ file(GLOB_RECURSE lib_include "${lib_include_dir}/**.*")
 file(GLOB_RECURSE example_src "example/src/**.*")
 file(GLOB_RECURSE example_include "example/include/**.*")
 
-add_library(compiler_lib)
+add_library(compiler_lib SHARED)
 target_sources(compiler_lib PUBLIC ${lib_src} ${lib_include})
 target_include_directories(compiler_lib PUBLIC ${lib_include_dir})
 

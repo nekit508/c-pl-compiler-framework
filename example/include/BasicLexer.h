@@ -15,6 +15,9 @@ namespace example::lexer_rules {
         // keywords
         inline ncompiler::TokenKind def{"def", TID++};
         inline ncompiler::TokenKind returnn{"return", TID++};
+        inline ncompiler::TokenKind falsee{"false", TID++};
+        inline ncompiler::TokenKind truee{"true", TID++};
+        inline ncompiler::TokenKind voidd{"void", TID++};
 
         // onesymbol tokens
         inline ncompiler::TokenKind colon{"colon", TID++};
@@ -84,12 +87,18 @@ namespace example::lexer_rules {
 
     inline std::vector<std::string> keywords_l = {
         "def",
-        "return"
+        "return",
+        "false",
+        "true",
+        "void"
     };
 
     inline std::vector keywords_t = {
         token::def,
-        token::returnn
+        token::returnn,
+        token::falsee,
+        token::truee,
+        token::voidd
     };
 
 

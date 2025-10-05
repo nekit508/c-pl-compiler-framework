@@ -11,12 +11,12 @@ namespace ncompiler::utils {
     }
 
     template<typename T>
-    std::string toString(const std::vector<T> &array) {
+    std::string toString(const std::vector<T> &array, const std::string &sep = ", ") {
         std::string out;
 
         if (!array.empty()) {
             for (int i = 0; i < array.size() - 1; ++i)
-                out += array[i].toString() + ", ";
+                out += array[i].toString() + sep;
             out += array[array.size() - 1].toString();
         }
 
@@ -24,12 +24,12 @@ namespace ncompiler::utils {
     }
 
     template<typename T>
-    std::string toString(const std::vector<T*> &array) {
+    std::string toString(const std::vector<T*> &array, const std::string &sep = ", ") {
         std::string out;
 
         if (!array.empty()) {
             for (int i = 0; i < array.size() - 1; ++i)
-                out += array[i]->toString() + ", ";
+                out += array[i]->toString() + sep;
             out += array[array.size() - 1]->toString();
         }
 
