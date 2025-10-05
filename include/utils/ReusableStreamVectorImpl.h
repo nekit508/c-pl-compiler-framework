@@ -12,14 +12,13 @@ namespace ncompiler {
         T readNextObject() noexcept(false) override = 0;
         
         T get() override {
-            return obtainedObjects.at(currentPos);
+            return obtainedObjects[currentPos];
         }
         
         T next() override {
-            if (obtainedObjects.size()-1 == currentPos) {
+            currentPos++;
+            if (obtainedObjects.size() == currentPos)
                 obtainedObjects.push_back(std::move(readNextObject()));
-                currentPos++;
-            }
             return get();
         }
         

@@ -12,15 +12,19 @@
 #include "utils/ReusableStreamVectorImpl.h"
 
 namespace ncompiler {
-    /** Must obtaint control over reader and keys in rules */
+    /** Must obtaint control over reader and root_rules. */
     struct Lexer : ReusableStreamVectorImpl<Token> {
         PosProviderReusableCharStreamWrapper *reader;
-        std::vector<LexerRule*> root_rules;
+        std::vector<LexerRule *> root_rules;
         Token ct;
         bool token_parsed = false;
         Logger logger;
+        bool eof = false;
 
-        explicit Lexer(PosProviderReusableCharStreamWrapper *reader, const bool use_debug = false) : reader(reader), logger(use_debug) {
+        TokenKind eof_t{"eof", 0};
+
+        explicit Lexer(PosProviderReusableCharStreamWrapper *reader, const bool use_debug = false) : reader(reader),
+            logger(use_debug) {
         }
 
         void saveCharState() const {
@@ -51,8 +55,13 @@ namespace ncompiler {
             reader->redo();
         }
 
-        char getNextChar() const { // NOLINT(*-use-nodiscard)
+        char getNextChar() const {
+            // NOLINT(*-use-nodiscard)
             return reader->next();
+        }
+
+        void skipChar() const {
+            reader->next();
         }
 
         [[nodiscard]] Pos pos() const {
@@ -63,7 +72,7 @@ namespace ncompiler {
             token_parsed = true;
         }
 
-        void tokenParsed(const TokenKind *kind) {
+        void tokenParsed(const TokenKind &kind) {
             tokenParsed();
             ct.kind = kind;
         }
@@ -83,16 +92,26 @@ namespace ncompiler {
 
         void parseNextToken() noexcept(false) {
             try {
-                if (reader->getPos() == -1) {
-                    const auto c = reader->next();
-                    if (c == static_cast<char>(65279))
-                        logger.info("Probably you are using UTF with BOM that is not supported. " + reader->getCurrentPosition().toString());
+                if (eof) {
+                    token_parsed = false;
+                    ct.kind = eof_t;
+                    ct.literal.erase();
+                    ct.pos = reader->getCurrentPosition();
+                    return;
                 }
 
                 token_parsed = false;
-                ct.kind = nullptr;
+                ct.kind.discard();
                 ct.literal.erase();
                 ct.pos = reader->getCurrentPosition();
+
+                if (reader->getPos() == -1) {
+                    const auto c = reader->next();
+                    if (c == static_cast<char>(65279))
+                        logger.error(
+                            "Probably you are using UTF with BOM that is not supported. " + reader->getCurrentPosition()
+                            .toString());
+                }
 
                 for (const auto &rule: root_rules) {
                     try {
@@ -108,6 +127,7 @@ namespace ncompiler {
             } catch (const EOSExсeption &e) {
                 if (!token_parsed)
                     throw LexerExсeption(e.whats(), reader->getCurrentPosition());
+                eof = true;
             }
         }
 
@@ -117,6 +137,8 @@ namespace ncompiler {
 
         ~Lexer() override {
             delete reader;
+            for (const auto root_rule: root_rules)
+                delete root_rule;
         }
     };
 }

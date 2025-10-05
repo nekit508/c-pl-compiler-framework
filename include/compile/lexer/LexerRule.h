@@ -10,6 +10,9 @@ namespace ncompiler {
         explicit LexerRule(std::string &&name) : name(std::move(name)) {
         }
 
+        explicit LexerRule(const std::string &name) : name(name) {
+        }
+
         bool tryParse(Lexer *lexer) noexcept(false) {
             if (!canParse(lexer))
                 return false;

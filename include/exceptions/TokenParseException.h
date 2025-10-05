@@ -10,7 +10,7 @@ namespace ncompiler {
         }
 
         [[nodiscard]] std::string whats() const noexcept override {
-            return message;
+            return "TokenParseException:(" + message + ")";
         }
     };
 }

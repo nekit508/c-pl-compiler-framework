@@ -15,7 +15,7 @@ namespace ncompiler {
         }
 
         [[nodiscard]] std::string whats() const noexcept override {
-            return message + pos.toString();
+            return "LexerExсeption:(" + message + ")" + pos.toString();
         }
     };
 }

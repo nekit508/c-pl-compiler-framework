@@ -25,7 +25,7 @@ namespace ncompiler {
         void redo() override {
             auto c = get();
 
-            if (!in(c, notVisible))
+            if (utils::in(c, notVisible) == -1)
                 currentPos.pos -= 1;
 
             if (c == '\n') {
@@ -40,7 +40,7 @@ namespace ncompiler {
         char next() override {
             auto c = ReusableStreamWrapper::next();
 
-            if (!in(c, notVisible))
+            if (utils::in(c, notVisible) == -1)
                 currentPos.pos += 1;
 
             if (c == '\n') {
