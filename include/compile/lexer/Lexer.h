@@ -92,18 +92,15 @@ namespace ncompiler {
 
         void parseNextToken() noexcept(false) {
             try {
+                ct.literal.erase();
+                ct.kind.discard();
+                token_parsed = false;
+                ct.pos = reader->getCurrentPosition();
+                
                 if (eof) {
-                    token_parsed = false;
                     ct.kind = eof_t;
-                    ct.literal.erase();
-                    ct.pos = reader->getCurrentPosition();
                     return;
                 }
-
-                token_parsed = false;
-                ct.kind.discard();
-                ct.literal.erase();
-                ct.pos = reader->getCurrentPosition();
 
                 if (reader->getPos() == -1) {
                     const auto c = reader->next();
