@@ -13,3 +13,8 @@ jobs:
       with:
         submodule_update: ON
         run_tests: OFF
+        package_generator: TGZ
+    - uses: actions/upload-artifact@v2
+      with:
+        path: build/*.tar.gz
+        name: artifact_${{ matrix.os }}_${{ matrix.configs }}.tar.gz
