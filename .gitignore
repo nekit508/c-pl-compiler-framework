@@ -13,3 +13,5 @@ CMakeUserPresets.json
 cmake-build*
 
 .idea
+
+out.bc
