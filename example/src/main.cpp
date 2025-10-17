@@ -1,3 +1,4 @@
+#include "BasicCompiler.h"
 #include "BasicLexer.h"
 #include "BasicParser.h"
 #include "compile/lexer/Lexer.h"
@@ -18,6 +19,8 @@ void process_file(const std::string &file) {
     try {
         const auto tree = parser.parseCompileSource();
         logger.info(tree->toString());
+        auto compiler = example::Compiler(tree);
+        compiler.compile("../out.bc");
         delete tree;
     } catch (const ncompiler::ParserException &e) {
         logger.error(e.whats());

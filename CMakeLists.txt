@@ -16,7 +16,8 @@ target_include_directories(compiler_lib PUBLIC ${lib_include_dir})
 
 message("src: ${example_src}")
 
-add_executable(compiler_example)
+add_executable(compiler_example
+        example/include/BasicCompiler.h)
 target_sources(compiler_example PUBLIC ${example_src} ${example_include})
 target_link_libraries(compiler_example PUBLIC compiler_lib)
 target_include_directories(compiler_example PUBLIC ${lib_include_dir} "example/include")
